@@ -1,17 +1,6 @@
 import { notFound } from "next/navigation";
+import { getMeetingById } from "@/lib/meetings-db";
 import type { SacramentMeeting } from "@/lib/types";
-
-async function getMeeting(id: string): Promise<SacramentMeeting | null> {
-  const res = await fetch(`http://localhost:3000/api/meetings/${id}`, {
-    cache: "no-store",
-  });
-
-  if (res.status === 404 || res.status === 400) {
-    return null;
-  }
-
-  return res.json();
-}
 
 export default async function MeetingDetailPage({
   params,
@@ -19,7 +8,13 @@ export default async function MeetingDetailPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const meeting = await getMeeting(id);
+  const meetingId = Number(id);
+
+  if (isNaN(meetingId)) {
+    notFound();
+  }
+
+  const meeting = getMeetingById(meetingId);
 
   if (!meeting) {
     notFound();

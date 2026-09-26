@@ -7,15 +7,20 @@ export async function GET(
   const { id } = await params;
   const meetingId = Number(id);
 
-  if (isNaN(meetingId)) {
+  if (!Number.isInteger(meetingId) || meetingId < 1) {
     return Response.json({ error: "Invalid meeting ID" }, { status: 400 });
   }
 
-  const meeting = getMeetingById(meetingId);
+  try {
+    const meeting = await getMeetingById(meetingId);
 
-  if (!meeting) {
-    return Response.json({ error: "Meeting not found" }, { status: 404 });
+    if (!meeting) {
+      return Response.json({ error: "Meeting not found" }, { status: 404 });
+    }
+
+    return Response.json(meeting);
+  } catch (error) {
+    console.error(`GET /api/meetings/${id} failed:`, error);
+    return Response.json({ error: "Failed to load meeting" }, { status: 500 });
   }
-
-  return Response.json(meeting);
 }

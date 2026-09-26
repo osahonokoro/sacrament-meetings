@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import { getMeetingById } from "@/lib/meetings-db";
-import type { SacramentMeeting } from "@/lib/types";
+import { formatMeetingDate } from "@/lib/format";
 
 export default async function MeetingDetailPage({
   params,
@@ -10,11 +10,11 @@ export default async function MeetingDetailPage({
   const { id } = await params;
   const meetingId = Number(id);
 
-  if (isNaN(meetingId)) {
+  if (!Number.isInteger(meetingId) || meetingId < 1) {
     notFound();
   }
 
-  const meeting = getMeetingById(meetingId);
+  const meeting = await getMeetingById(meetingId);
 
   if (!meeting) {
     notFound();
@@ -25,12 +25,7 @@ export default async function MeetingDetailPage({
       <div className="flex justify-between items-start mb-6">
         <div>
           <h1 className="text-2xl font-bold text-blue-900">
-            {new Date(meeting.date).toLocaleDateString("en-US", {
-              weekday: "long",
-              year: "numeric",
-              month: "long",
-              day: "numeric",
-            })}
+            {formatMeetingDate(meeting.date)}
           </h1>
           <p className="text-sm text-gray-500 capitalize mt-1">
             {meeting.meetingType} meeting

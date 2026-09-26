@@ -1,5 +1,6 @@
 import Link from "next/link";
 import type { SacramentMeeting } from "@/lib/types";
+import { formatMeetingDate } from "@/lib/format";
 
 interface MeetingCardProps {
   meeting: SacramentMeeting;
@@ -13,12 +14,7 @@ export default function MeetingCard({ meeting }: MeetingCardProps) {
     >
       <div className="flex justify-between items-start mb-2">
         <h2 className="text-lg font-semibold text-blue-800">
-          {new Date(meeting.date).toLocaleDateString("en-US", {
-            weekday: "long",
-            year: "numeric",
-            month: "long",
-            day: "numeric",
-          })}
+          {formatMeetingDate(meeting.date)}
         </h2>
         <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded-full capitalize">
           {meeting.meetingType}

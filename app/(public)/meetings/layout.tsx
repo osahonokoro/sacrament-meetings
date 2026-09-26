@@ -1,27 +1,9 @@
-import Link from "next/link";
-
+// Member-facing meetings section. Site navigation lives in NavLinks (Header);
+// this layout scopes loading.tsx and shared styling to the /meetings routes.
 export default function PublicMeetingsLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  return (
-    <div>
-      <nav aria-label="Meetings" className="mb-6 print:hidden">
-        <ul className="flex gap-4 text-sm">
-          <li>
-            <Link href="/meetings" className="text-blue-800 underline-offset-4 hover:underline">
-              All Meetings
-            </Link>
-          </li>
-          <li>
-            <Link href="/meetings/current" className="text-blue-800 underline-offset-4 hover:underline">
-              This Sunday
-            </Link>
-          </li>
-        </ul>
-      </nav>
-      {children}
-    </div>
-  );
+  return <section aria-label="Sacrament meetings">{children}</section>;
 }

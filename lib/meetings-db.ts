@@ -113,22 +113,85 @@ export async function getMeetingById(
 
 // Mutation stubs — will be wired to the database in Week 04
 export async function addMeeting(
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   data: Omit<SacramentMeeting, "id">
 ): Promise<SacramentMeeting> {
-  throw new Error("addMeeting: database implementation coming in Week 04");
+  const sql = getSql();
+  const rows = await sql`
+    INSERT INTO meetings (
+      date, meeting_type, presiding, conducting,
+      announcements, opening_hymn, opening_prayer,
+      ward_business, stake_business, sacrament_hymn,
+      speakers, closing_hymn, closing_prayer
+    )
+    VALUES (
+      ${data.date}::date,
+      ${data.meetingType},
+      ${data.presiding},
+      ${data.conducting},
+      ${data.announcements ?? []},
+      ${JSON.stringify(data.openingHymn)}::jsonb,
+      ${data.openingPrayer},
+      ${JSON.stringify(data.wardBusiness)}::jsonb,
+      ${data.stakeBusiness},
+      ${JSON.stringify(data.sacramentHymn)}::jsonb,
+      ${JSON.stringify(data.speakers)}::jsonb,
+      ${JSON.stringify(data.closingHymn)}::jsonb,
+      ${data.closingPrayer}
+    )
+    RETURNING
+      id,
+      to_char(date, 'YYYY-MM-DD') AS "date",
+      meeting_type AS "meetingType",
+      presiding, conducting, announcements,
+      opening_hymn AS "openingHymn",
+      opening_prayer AS "openingPrayer",
+      ward_business AS "wardBusiness",
+      stake_business AS "stakeBusiness",
+      sacrament_hymn AS "sacramentHymn",
+      speakers,
+      closing_hymn AS "closingHymn",
+      closing_prayer AS "closingPrayer"
+  `;
+  return rows[0] as unknown as SacramentMeeting;
 }
 
 export async function updateMeeting(
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   id: number,
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   updates: Partial<SacramentMeeting>
 ): Promise<SacramentMeeting | null> {
-  throw new Error("updateMeeting: database implementation coming in Week 04");
+  const sql = getSql();
+
+  // Only update the fields the form actually submits.
+  const rows = await sql`
+    UPDATE meetings SET
+      date           = COALESCE(${updates.date ?? null}::date, date),
+      meeting_type   = COALESCE(${updates.meetingType ?? null}, meeting_type),
+      presiding      = COALESCE(${updates.presiding ?? null}, presiding),
+      conducting     = COALESCE(${updates.conducting ?? null}, conducting),
+      opening_prayer = COALESCE(${updates.openingPrayer ?? null}, opening_prayer),
+      closing_prayer = COALESCE(${updates.closingPrayer ?? null}, closing_prayer)
+    WHERE id = ${id}
+    RETURNING
+      id,
+      to_char(date, 'YYYY-MM-DD') AS "date",
+      meeting_type AS "meetingType",
+      presiding, conducting, announcements,
+      opening_hymn AS "openingHymn",
+      opening_prayer AS "openingPrayer",
+      ward_business AS "wardBusiness",
+      stake_business AS "stakeBusiness",
+      sacrament_hymn AS "sacramentHymn",
+      speakers,
+      closing_hymn AS "closingHymn",
+      closing_prayer AS "closingPrayer"
+  `;
+  return (rows[0] as unknown as SacramentMeeting) ?? null;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export async function deleteMeeting(id: number): Promise<boolean> {
-  throw new Error("deleteMeeting: database implementation coming in Week 04");
+  const sql = getSql();
+  const rows = await sql`
+    DELETE FROM meetings WHERE id = ${id} RETURNING id
+  `;
+  return rows.length > 0;
 }
